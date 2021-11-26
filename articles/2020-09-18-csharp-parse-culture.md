@@ -6,7 +6,7 @@ topics: [csharp]
 published: true
 ---
 
-## TD;LR
+## TL;DR
 
 .NET の `Parse` や `TryParse` は PC の言語設定によって動作が変わるので、国外で実行する可能性がある場合は第 2 引数を指定しよう。
 
