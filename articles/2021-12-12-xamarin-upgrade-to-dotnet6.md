@@ -65,6 +65,9 @@ https://ufcpp.net/blog/2017/5/newcsproj/
 .NET 6 ではデフォルトで C# 10.0 の機能が全て利用できます。
 [レコード型](https://ufcpp.net/study/csharp/cheatsheet/ap_ver9/#record)や [`not` パターン](https://ufcpp.net/study/csharp/datatype/patterns/?p=3#not-pattern)、[ファイル スコープ名前空間](https://ufcpp.net/study/csharp/cheatsheet/ap_ver10/#file-scoped-namespace)など便利な機能がたくさん増えているので、積極的に使っていきましょう。
 
+https://ufcpp.net/study/csharp/cheatsheet/ap_ver9/
+https://ufcpp.net/study/csharp/cheatsheet/ap_ver10/
+
 ⚠️ Visual Studio 2019 でのビルドが不可能に
 
 Visual Studio 2019 では .NET 6 アプリケーションのビルドはサポートされていないので、.NET 6 に移行すると当然ビルドができなくなってしまいます。
@@ -159,6 +162,5 @@ string dotnetVersion = Environment.Version.ToString();
 | ------------- | ------------------------------ | ------- |
 | monoVersion   | `6.12.0 (2020-02/c633fe92383)` | (null)  |
 | dotnetVersion | `4.0.50524.0`                  | `6.0.0` |
-|               |                                |         |
 
 というわけで本物の .NET 6 が動いているようです。
