@@ -12,11 +12,11 @@ published: true
 ---
 
 日本時間 2021/11/08 に .NET 6 と Visual Studio 2022 がリリースされましたが、一方で Xamarin の余命宣告がされました。
-サポート期限は 2 年後の 2023/11 まで、それまでにまだリリースもされていない MAUI への移行を済ませる必要があります。
+サポート期限は 2 年後の 2023/11 まで、それまでにまだリリースもされていない後継フレームワーク [MAUI](https://docs.microsoft.com/ja-jp/dotnet/maui/what-is-maui) への移行を済ませる必要があります。
 https://devblogs.microsoft.com/xamarin/whats-new-in-xamarin-and-visual-studio-2022/
 
-MAUI は .NET 6 以降のみのサポートとなる[^1]ため、従来の Xamarin.Froms から MAUI へ移行する場合、実行環境と UI フレームワークを同時に更新することとなり、両者の破壊的変更に悩まされることが予想されます。
-この記事では MAUI への移行に備え、UI フレームワークを Xamarin.Froms のまま実行環境のみを .NET 6 に移行する手順を紹介します。
+MAUI は .NET 6 以降のみのサポートとなる[^1]ため、従来の Xamarin.Froms から MAUI へ移行する場合、実行環境とフレームワークを同時に更新することとなり、両者の破壊的変更に悩まされることが予想されます。
+この記事では MAUI への移行に備え、フレームワークを Xamarin.Froms のまま実行環境のみを .NET 6 に移行する手順を紹介します。
 
 [^1]: https://github.com/dotnet/maui/wiki/Xamarin.Forms-vs-.NET-MAUI
 
@@ -28,15 +28,15 @@ MAUI は .NET 6 以降のみのサポートとなる[^1]ため、従来の Xamar
 
 |                                           | 従来の Xamarin.Froms      | .NET 6 の Xamarin.Froms | MAUI       |
 | ----------------------------------------- | ------------------------- | ----------------------- | ---------- |
-| UI フレームワーク                         | Xamarin.Froms             | Xamarin.Froms           | ✅ **MAUI** |
-| UI フレームワークのサポート期限           | 2023/11                   | 2023/11                 | ✅ 未発表   |
+| フレームワーク                            | Xamarin.Froms             | Xamarin.Froms           | ✅ **MAUI** |
+| フレームワークのサポート期限              | 2023/11                   | 2023/11                 | ✅ 未発表   |
 | 実行環境                                  | Xamarin (Mono)            | ✅ **.NET 6**            | .NET 6     |
 | 実行環境のサポート期限                    | 2023/11                   | ✅ **2024/11/08**        | 2024/11/08 |
 | `.csproj` の形式                          | Non-SDK-style / SDK-style | ⚠️ **SDK-style**         | SDK-style  |
 | 既定の C# バージョン                      | C# 8.0                    | ✅ **C# 10.0**           | C# 10.0    |
 | サポートされる Visual Studio のバージョン | 2019 / 2022               | ⚠️ **2022**              | 2022       |
 
-🟦 UI フレームワークは Xamarin.Froms のまま
+🟦 フレームワークは Xamarin.Froms のまま
 
 .NET 6 に移行したからといって Xamarin.Froms 側で特に変わることはありません。
 サポート期限も変わらず 2023/11 です。
@@ -46,7 +46,12 @@ MAUI は .NET 6 以降のみのサポートとなる[^1]ため、従来の Xamar
 
 これにより、従来の `netstandard2.1` やプラットフォーム固有のライブラリに加え、`netcoreapp` `net5.0` `net6.0` のライブラリを使用できます。
 .NET 6 までの性能向上の恩恵を受けられる半面、細かい破壊的変更が多数含まれているため注意が必要です。
-といっても実際踏みそうな破壊的変更はコンパイラ警告がいくつか増えたのと、[.NET 6 で `DeflateStream` `GZipStream` `CryptoStream` の挙動が変更された](https://docs.microsoft.com/ja-jp/dotnet/core/compatibility/core-libraries/6.0/partial-byte-reads-in-streams)ぐらいだとは思いますが。
+
+筆者が特に注意が必要と考えている破壊的変更は以下の 2 つです。
+アプリケーションコードで使用していない場合でもサードパーティー製ライブラリで利用している可能性もあるため気を付けましょう。
+
+- [DeflateStream、GZipStream、CryptoStream での部分的な読み取りとゼロバイトの読み取り](https://docs.microsoft.com/ja-jp/dotnet/core/compatibility/core-libraries/6.0/partial-byte-reads-in-streams)
+- [System.Drawing.Common が Windows でしかサポートされない](https://docs.microsoft.com/ja-jp/dotnet/core/compatibility/core-libraries/6.0/system-drawing-common-windows-only)
 
 https://docs.microsoft.com/ja-jp/dotnet/core/compatibility/breaking-changes
 
@@ -74,15 +79,23 @@ Visual Studio 2019 では .NET 6 アプリケーションのビルドはサポ�
 しかも厄介なことに 2019 でビルドしようとすると `bin` `obj` フォルダが壊れてしまうようで、壊れてしまったこれらのフォルダを削除しないと 2022 でもビルドが通らなくなります。
 気を付けましょう。（1 敗）
 
+----
 
 ## Xamarin.Froms プロジェクトを .NET 6 へ移行する
 
 違いがわかったところで .NET 6 への移行を始めましょう。
-下記の手順は Visual Studio 2022 の Xamarin.Froms テンプレートで生成したソリューション `XamarinSandbox` で試したものになります。
+
+### 0. 前提条件
+
+下記の手順は Visual Studio 2022 で動作確認をしています。
+Visual Studio for Mac での動作確認はしていないため、注意してください。
+https://visualstudio.microsoft.com/
+
+また実際に移行した際のソースコードは [github.com/proudust/XamarinSandbox](https://github.com/proudust/XamarinSandbox/tree/xamarin-update/net6.0) にあります。
 
 ### 1. `.csproj` を SDK-style に移行する
 
-各プロジェクトの `.csproj` を SDK-style のような形式に移行して回ります。
+各プラットフォーム固有のプロジェクトの `.csproj` を SDK-style のような形式に移行して回ります。
 .NET アップグレード アシスタントで移行してしまうのが早いです。
 https://docs.microsoft.com/ja-jp/dotnet/core/porting/upgrade-assistant-overview
 
@@ -106,15 +119,38 @@ $ upgrade-assistant upgrade XamarinSandbox/XamarinSandbox.iOS/XamarinSandbox.iOS
 なぜか `bin` `obj` フォルダを事前に削除しておかないとエラーになるため、`rd` コマンドで削除しています。
 :::
 
+:::message
+共有プロジェクトは初めから SDK-style になっているはずなので、この手順では無視して問題ありません。
+念のため確認したい場合は `.csproj` を開き、`Project` 要素に `Sdk` 属性がついているかを確認します。
+Non-SDK-style だった場合はプラットフォーム固有のプロジェクト同様に `upgrade-assistant upgrade` コマンドを実行します。
+
+```xml:SDK-style の例
+<Project Sdk="Microsoft.NET.Sdk">
+```
+
+```xml:Non-SDK-style の例
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+```
+:::
+
 ### 2. `.csproj` を手作業で修正
 
 下記のように変更します。
 
-- `TargetFramework` を `net6.0-android` または `net6.0-ios` に変更
-- `PropertyGroup` に `<GenerateAssemblyInfo>false</GenerateAssemblyInfo>` を追加
-- (Android のみ) `RootNamespace` をアップグレード前の値で追加
+**共有プロジェクト**
+- `TargetFramework` を `net6.0` に変更
 
-Android プロジェクトの場合以下のようになります。
+```diff xml:XamarinSandbox.csproj
+   <PropertyGroup>
+-    <TargetFramework>netstandard2.0</TargetFramework>
++    <TargetFramework>net6.0</TargetFramework>
+   </PropertyGroup>
+```
+
+**Android プロジェクト**
+- `TargetFramework` を `net6.0-android` に変更
+- `PropertyGroup` に `<GenerateAssemblyInfo>false</GenerateAssemblyInfo>` を追加
+- `RootNamespace` をアップグレード前の値で追加
 
 ```diff xml:XamarinSandbox.Android.csproj
    <PropertyGroup>
@@ -125,24 +161,41 @@ Android プロジェクトの場合以下のようになります。
    </PropertyGroup>
 ```
 
+**iOS プロジェクト**
+- `TargetFramework` を `net6.0-ios` に変更
+- `PropertyGroup` に `<GenerateAssemblyInfo>false</GenerateAssemblyInfo>` を追加
+
+```diff xml:XamarinSandbox.iOS.csproj
+   <PropertyGroup>
+-    <TargetFramework>net6.0</TargetFramework>
++    <TargetFramework>net6.0-ios</TargetFramework>
++    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+   </PropertyGroup>
+```
+
+:::message
+`GenerateAssemblyInfo` はアセンブリ属性を自動生成する設定で、SDK-style ではデフォルトで true に設定されています。
+Android / iOS プロジェクトの場合はテンプレートに存在する `Properties\AssemblyInfo.cs` の定義と重複してしまいコンパイルエラーとなってしまうため、明示的に無効にする設定を加えています。
+今回は解説を省きますが、自動生成される属性を `Properties\AssemblyInfo.cs` から削除することでもコンパイルエラーを回避することができます。
+:::
+
+:::message
+`RootNamespace` はプロジェクトの既定の名前空間を変更する設定で、SDK-style ではデフォルトでプロジェクト名に設定されています。
+Android プロジェクトのみ `Xamarin.Forms.Android` 名前空間との衝突を避けるため、プロジェクト.Droid に変更する必要があります。
+:::
+
 ### 3. Visual Studio でソリューションを開き、構成マネージャを開く
 
 ここまで行った後、Visual Studio 2022 でソリューションを開くと、「現在のソリューションには、正しくない構成マッピングが含まれています。（後略）」という表示が出ます。
 指示に従い構成マネージャを開き、そのまま何も変更せずに閉じ、すべて保存します。
 それだけで `XamarinSandbox.sln` が修正されるので、これで完了です。
 
-### 4. Xamarin.Froms プロジェクトのターゲットフレームワークを .NET 6 に変更
+### Ex. 本当に .NET 6 になったのか確かめてみる
 
-ここまで来ると Visual Studio 上から Xamarin.Froms プロジェクトのターゲットフレームワークを .NET 6 に変更できます。
-変更後、デバッグ実行して正常動作することを確認しましょう。
-
-
-## 本当に .NET 6 になったのか確かめてみる
-
-せっかくなので本当に .NET 6 が Android などの端末で動作しているのか確かめてみましょう。
+せっかくなので本当に .NET 6 が Android や iOS 上で動作しているのか確かめてみましょう。
 
 従来の Xamarin では .NET の Linux 向け実装である Mono が使用されていました。
-その Mono に含まれる `Mono.Runtime` クラスの `Runtime.GetDisplayName()` クラスをリフレクションで所得し、実行することで確かめてみましょう。
+その Mono に含まれる `Mono.Runtime` クラスの `Runtime.GetDisplayName()` クラスをリフレクションで取得し、実行することで確かめてみましょう。
 下記のようなコードで取得することができます。[^2]
 
 [^2]: 参考: https://social.msdn.microsoft.com/Forums/en-US/5dd995d7-9692-4647-9c7a-107129823ea0/how-to-check-my-mono-version
