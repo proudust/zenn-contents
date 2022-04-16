@@ -149,11 +149,13 @@ Non-SDK-style だった場合はプラットフォーム固有のプロジェク
 
 **共有プロジェクト**
 - `TargetFramework` を `net6.0` に変更
+- ([Xamarin.Forms.Visual.Material](https://www.nuget.org/packages/Xamarin.Forms.Visual.Material/) を参照している場合のみ) `XFDisableTargetFrameworkValidation` を `True` で追加
 
 ```diff xml:XamarinSandbox.csproj
    <PropertyGroup>
 -    <TargetFramework>netstandard2.0</TargetFramework>
 +    <TargetFramework>net6.0</TargetFramework>
++    <XFDisableTargetFrameworkValidation>True</XFDisableTargetFrameworkValidation>
    </PropertyGroup>
 ```
 
@@ -161,6 +163,7 @@ Non-SDK-style だった場合はプラットフォーム固有のプロジェク
 - `TargetFramework` を `net6.0-android` に変更
 - `PropertyGroup` に `<GenerateAssemblyInfo>false</GenerateAssemblyInfo>` を追加
 - `RootNamespace` をアップグレード前の値で追加
+- (Xamarin.Forms.Visual.Material を参照している場合のみ) `XFDisableTargetFrameworkValidation` を `True` で追加
 
 ```diff xml:XamarinSandbox.Android.csproj
    <PropertyGroup>
@@ -168,18 +171,21 @@ Non-SDK-style だった場合はプラットフォーム固有のプロジェク
 +    <TargetFramework>net6.0-android</TargetFramework>
 +    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
 +    <RootNamespace>XamarinSandbox.Droid</RootNamespace>
++    <XFDisableTargetFrameworkValidation>True</XFDisableTargetFrameworkValidation>
    </PropertyGroup>
 ```
 
 **iOS プロジェクト**
 - `TargetFramework` を `net6.0-ios` に変更
 - `PropertyGroup` に `<GenerateAssemblyInfo>false</GenerateAssemblyInfo>` を追加
+- (Xamarin.Forms.Visual.Material を参照している場合のみ) `XFDisableTargetFrameworkValidation` を `True` で追加
 
 ```diff xml:XamarinSandbox.iOS.csproj
    <PropertyGroup>
 -    <TargetFramework>net6.0</TargetFramework>
 +    <TargetFramework>net6.0-ios</TargetFramework>
 +    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
++    <XFDisableTargetFrameworkValidation>True</XFDisableTargetFrameworkValidation>
    </PropertyGroup>
 ```
 
@@ -194,6 +200,13 @@ Android / iOS プロジェクトの場合はテンプレートに存在する `P
 Android プロジェクトのみ `Xamarin.Forms.Android` 名前空間との衝突を避けるため、プロジェクト.Droid に変更する必要があります。
 :::
 
+:::message
+Xamarin.Forms.Visual.Material には Xamarin.(Android|iOS) のバージョンチェック処理が含まれていますが、.NET 6 を使用している場合 Xamarin.(Android|iOS) 6.0 と誤認識されてしまいコンパイルエラーになります。
+`XFDisableTargetFrameworkValidation` を `True` に設定することでこのバージョンチェック処理をスキップすることができます。[^2]
+:::
+
+[^2]: ソース: https://github.com/xamarin/Xamarin.Forms/blob/8af4f19be0cfb75f6a1df70c4db94eb6937ea1ee/.nuspec/Xamarin.Forms.Visual.Material.targets#L2
+
 ### 4. Visual Studio でソリューションを開き、構成マネージャを開く
 
 ここまで行った後、Visual Studio 2022 でソリューションを開くと、「現在のソリューションには、正しくない構成マッピングが含まれています。（後略）」という表示が出ます。
@@ -206,9 +219,9 @@ Android プロジェクトのみ `Xamarin.Forms.Android` 名前空間との衝�
 
 従来の Xamarin では .NET の Linux 向け実装である Mono が使用されていました。
 その Mono に含まれる `Mono.Runtime` クラスの `Runtime.GetDisplayName()` クラスをリフレクションで取得し、実行することで確かめてみましょう。
-下記のようなコードで取得することができます。[^2]
+下記のようなコードで取得することができます。[^3]
 
-[^2]: 参考: https://social.msdn.microsoft.com/Forums/en-US/5dd995d7-9692-4647-9c7a-107129823ea0/how-to-check-my-mono-version
+[^3]: 参考: https://social.msdn.microsoft.com/Forums/en-US/5dd995d7-9692-4647-9c7a-107129823ea0/how-to-check-my-mono-version
 
 ```cs
 string monoVersion = Type.GetType("Mono.Runtime")
