@@ -93,6 +93,13 @@ https://visualstudio.microsoft.com/
 
 また実際に移行した際のソースコードは [github.com/proudust/XamarinSandbox](https://github.com/proudust/XamarinSandbox/tree/xamarin-update/net6.0) にあります。
 
+:::message alert
+[Xamarin.CommunityToolkit](https://www.nuget.org/packages/Xamarin.CommunityToolkit/) など下記条件を満たす NuGet パッケージを参照している場合、下記手順では正しく移行することができません。
+
+- .NET 6 用バイナリが同梱されていない
+- .NET Core 3.1 用バイナリが Windows 依存になっている
+:::
+
 ### 1. `dotnet workload` コマンドで Android / iOS ワークロードをインストール
 
 MAUI リリース前のバージョンの Visual Studio 2022 を使用する場合、.NET 6 の Android / iOS サポートを別途インストールする必要があります。
