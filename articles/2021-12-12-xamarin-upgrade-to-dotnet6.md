@@ -87,13 +87,23 @@ Visual Studio 2019 では .NET 6 アプリケーションのビルドはサポ�
 
 ### 0. 前提条件
 
-下記の手順は Visual Studio 2022 で動作確認をしています。
+下記の手順は Visual Studio 2022 v17.4.1 及び .NET v6.0.202 で動作確認をしています。
 Visual Studio for Mac での動作確認はしていないため、注意してください。
 https://visualstudio.microsoft.com/
 
 また実際に移行した際のソースコードは [github.com/proudust/XamarinSandbox](https://github.com/proudust/XamarinSandbox/tree/xamarin-update/net6.0) にあります。
 
-### 1. `.csproj` を SDK-style に移行する
+### 1. `dotnet workload` コマンドで Android / iOS ワークロードをインストール
+
+MAUI リリース前のバージョンの Visual Studio 2022 を使用する場合、.NET 6 の Android / iOS サポートを別途インストールする必要があります。
+以下のコマンドでインストールできます。
+
+```text
+dotnet workload install android
+dotnet workload install ios
+```
+
+### 2. `.csproj` を SDK-style に移行する
 
 各プラットフォーム固有のプロジェクトの `.csproj` を SDK-style のような形式に移行して回ります。
 .NET アップグレード アシスタントで移行してしまうのが早いです。
@@ -133,7 +143,7 @@ Non-SDK-style だった場合はプラットフォーム固有のプロジェク
 ```
 :::
 
-### 2. `.csproj` を手作業で修正
+### 3. `.csproj` を手作業で修正
 
 下記のように変更します。
 
@@ -184,7 +194,7 @@ Android / iOS プロジェクトの場合はテンプレートに存在する `P
 Android プロジェクトのみ `Xamarin.Forms.Android` 名前空間との衝突を避けるため、プロジェクト.Droid に変更する必要があります。
 :::
 
-### 3. Visual Studio でソリューションを開き、構成マネージャを開く
+### 4. Visual Studio でソリューションを開き、構成マネージャを開く
 
 ここまで行った後、Visual Studio 2022 でソリューションを開くと、「現在のソリューションには、正しくない構成マッピングが含まれています。（後略）」という表示が出ます。
 指示に従い構成マネージャを開き、そのまま何も変更せずに閉じ、すべて保存します。
