@@ -120,9 +120,15 @@ https://visualstudio.microsoft.com/
 
 :::message alert
 [Xamarin.CommunityToolkit](https://www.nuget.org/packages/Xamarin.CommunityToolkit/) など下記条件を満たす NuGet パッケージを参照している場合、下記手順では正しく移行することができません。
+詳細は [xamarin/XamarinCommunityToolkit#985](https://github.com/xamarin/XamarinCommunityToolkit/issues/985) を確認してください。
 
 - .NET 6 用バイナリが同梱されていない
 - .NET Core 3.1 用バイナリが Windows 依存になっている
+:::
+
+:::message alert
+[Xamarin.Firebase.iOS.CloudMessaging](https://www.nuget.org/packages/Xamarin.Firebase.iOS.CloudMessaging/) を参照している場合、Windows 上での NuGet パッケージの復元に失敗する現象が確認されています。(v8.10.0.1 現在)
+詳細は [xamarin/GoogleApisForiOSComponents#568](https://github.com/xamarin/GoogleApisForiOSComponents/issues/568) を確認してください。
 :::
 
 ### 1. `dotnet workload` コマンドで Android / iOS ワークロードをインストール
