@@ -1,5 +1,5 @@
 ---
-title: Xamarin.Froms プロジェクトを .NET6 へアップグレードする
+title: Xamarin.Forms プロジェクトを .NET6 へアップグレードする
 emoji: 6️⃣
 type: tech
 topics: [csharp, dotnet, xamarin, xamarinforms]
@@ -15,8 +15,8 @@ published: true
 サポート期限は 2 年後の 2023/11 まで、それまでにまだリリースもされていない後継フレームワーク [MAUI](https://docs.microsoft.com/ja-jp/dotnet/maui/what-is-maui) への移行を済ませる必要があります。
 https://devblogs.microsoft.com/xamarin/whats-new-in-xamarin-and-visual-studio-2022/
 
-MAUI は .NET 6 以降のみのサポートとなる[^1]ため、従来の Xamarin.Froms から MAUI へ移行する場合、実行環境とフレームワークを同時に更新することとなり、両者の破壊的変更に悩まされることが予想されます。
-この記事では MAUI への移行に備え、フレームワークを Xamarin.Froms のまま実行環境のみを .NET 6 に移行する手順を紹介します。
+MAUI は .NET 6 以降のみのサポートとなる[^1]ため、従来の Xamarin.Forms から MAUI へ移行する場合、実行環境とフレームワークを同時に更新することとなり、両者の破壊的変更に悩まされることが予想されます。
+この記事では MAUI への移行に備え、フレームワークを Xamarin.Forms のまま実行環境のみを .NET 6 に移行する手順を紹介します。
 
 [^1]: https://github.com/dotnet/maui/wiki/Xamarin.Forms-vs-.NET-MAUI
 
@@ -26,9 +26,9 @@ MAUI は .NET 6 以降のみのサポートとなる[^1]ため、従来の Xamar
 
 実際に移行する前に、.NET 6 に移行することで何が変わるのか確認しましょう。
 
-|                                           | 従来の Xamarin.Froms      | .NET 6 の Xamarin.Froms | MAUI       |
+|                                           | 従来の Xamarin.Forms      | .NET 6 の Xamarin.Forms | MAUI       |
 | ----------------------------------------- | ------------------------- | ----------------------- | ---------- |
-| フレームワーク                            | Xamarin.Froms             | Xamarin.Froms           | ✅ **MAUI** |
+| フレームワーク                            | Xamarin.Forms             | Xamarin.Forms           | ✅ **MAUI** |
 | フレームワークのサポート期限              | 2023/11                   | 2023/11                 | ✅ 未発表   |
 | 実行環境                                  | Xamarin (Mono)            | ✅ **.NET 6**            | .NET 6     |
 | 実行環境のサポート期限                    | 2023/11                   | ✅ **2024/11/08**        | 2024/11/08 |
@@ -36,9 +36,9 @@ MAUI は .NET 6 以降のみのサポートとなる[^1]ため、従来の Xamar
 | 既定の C# バージョン                      | C# 8.0                    | ✅ **C# 10.0**           | C# 10.0    |
 | サポートされる Visual Studio のバージョン | 2019 / 2022               | ⚠️ **2022**              | 2022       |
 
-🟦 フレームワークは Xamarin.Froms のまま
+🟦 フレームワークは Xamarin.Forms のまま
 
-.NET 6 に移行したからといって Xamarin.Froms 側で特に変わることはありません。
+.NET 6 に移行したからといって Xamarin.Forms 側で特に変わることはありません。
 サポート期限も変わらず 2023/11 です。
 ちなみに 2023/11 は .NET 8 LTS がリリースされる予定の月でもあります。
 
@@ -66,7 +66,7 @@ https://ufcpp.net/blog/2017/5/newcsproj/
 
 ✅ 既定の C# バージョンが 8.0 から 10.0 に
 
-従来の Xamarin.Froms でも手順を踏めば C# 10.0 の機能を利用できましたが、その手順が少々面倒であったり、ランタイム側の修正を伴う[クラスの共変戻り値](https://ufcpp.net/study/csharp/cheatsheet/ap_ver9/#class-covariant-returns)が利用できなかったりしていました。
+従来の Xamarin.Forms でも手順を踏めば C# 10.0 の機能を利用できましたが、その手順が少々面倒であったり、ランタイム側の修正を伴う[クラスの共変戻り値](https://ufcpp.net/study/csharp/cheatsheet/ap_ver9/#class-covariant-returns)が利用できなかったりしていました。
 .NET 6 ではデフォルトで C# 10.0 の機能が全て利用できます。
 [レコード型](https://ufcpp.net/study/csharp/cheatsheet/ap_ver9/#record)や [`not` パターン](https://ufcpp.net/study/csharp/datatype/patterns/?p=3#not-pattern)、[ファイル スコープ名前空間](https://ufcpp.net/study/csharp/cheatsheet/ap_ver10/#file-scoped-namespace)など便利な機能がたくさん増えているので、積極的に使っていきましょう。
 
@@ -81,7 +81,7 @@ Visual Studio 2019 では .NET 6 アプリケーションのビルドはサポ�
 
 ----
 
-## Xamarin.Froms プロジェクトを .NET 6 へ移行する
+## Xamarin.Forms プロジェクトを .NET 6 へ移行する
 
 違いがわかったところで .NET 6 への移行を始めましょう。
 
