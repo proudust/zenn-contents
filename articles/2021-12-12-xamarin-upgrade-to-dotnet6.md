@@ -37,13 +37,14 @@ Xamarin.Forms が .NET 6 に対応しないことが名言されました。
 ---
 
 日本時間 2021/11/08 に .NET 6 と Visual Studio 2022 がリリースされましたが、一方で Xamarin の余命宣告がされました。
-サポート期限は 2 年後の 2023/11 まで、それまでにまだリリースもされていない後継フレームワーク [MAUI](https://docs.microsoft.com/ja-jp/dotnet/maui/what-is-maui) への移行を済ませる必要があります。
+サポート期限は ~~2 年後の 2023/11 まで~~ 2024/5/1 まで[^1]、それまでにまだリリースもされていない後継フレームワーク [MAUI](https://docs.microsoft.com/ja-jp/dotnet/maui/what-is-maui) への移行を済ませる必要があります。
 https://devblogs.microsoft.com/xamarin/whats-new-in-xamarin-and-visual-studio-2022/
 
-MAUI は .NET 6 以降のみのサポートとなる[^1]ため、従来の Xamarin.Forms から MAUI へ移行する場合、実行環境とフレームワークを同時に更新することとなり、両者の破壊的変更に悩まされることが予想されます。
+MAUI は .NET 6 以降のみのサポートとなる[^2]ため、従来の Xamarin.Forms から MAUI へ移行する場合、実行環境とフレームワークを同時に更新することとなり、両者の破壊的変更に悩まされることが予想されます。
 この記事では MAUI への移行に備え、フレームワークを Xamarin.Forms のまま実行環境のみを .NET 6 に移行する手順を紹介します。
 
-[^1]: https://github.com/dotnet/maui/wiki/Xamarin.Forms-vs-.NET-MAUI
+[^1]: https://dotnet.microsoft.com/en-us/platform/support/policy/xamarin
+[^2]: https://github.com/dotnet/maui/wiki/Xamarin.Forms-vs-.NET-MAUI
 
 ----
 
@@ -54,9 +55,9 @@ MAUI は .NET 6 以降のみのサポートとなる[^1]ため、従来の Xamar
 |                                           | 従来の Xamarin.Forms      | .NET 6 の Xamarin.Forms | MAUI       |
 | ----------------------------------------- | ------------------------- | ----------------------- | ---------- |
 | フレームワーク                            | Xamarin.Forms             | Xamarin.Forms           | ✅ **MAUI** |
-| フレームワークのサポート期限              | 2023/11                   | 2023/11                 | ✅ 未発表   |
+| フレームワークのサポート期限              | 2024/5/1                  | 2024/5/1                | ✅ 未発表   |
 | 実行環境                                  | Xamarin (Mono)            | ✅ **.NET 6**            | .NET 6     |
-| 実行環境のサポート期限                    | 2023/11                   | ✅ **2024/11/08**        | 2024/11/08 |
+| 実行環境のサポート期限                    | 2024/5/1                  | ✅ **2024/11/08**        | 2024/11/08 |
 | `.csproj` の形式                          | Non-SDK-style / SDK-style | ⚠️ **SDK-style**         | SDK-style  |
 | 既定の C# バージョン                      | C# 8.0                    | ✅ **C# 10.0**           | C# 10.0    |
 | サポートされる Visual Studio のバージョン | 2019 / 2022               | ⚠️ **2022**              | 2022       |
@@ -64,8 +65,8 @@ MAUI は .NET 6 以降のみのサポートとなる[^1]ため、従来の Xamar
 🟦 フレームワークは Xamarin.Forms のまま
 
 .NET 6 に移行したからといって Xamarin.Forms 側で特に変わることはありません。
-サポート期限も変わらず 2023/11 です。
-ちなみに 2023/11 は .NET 8 LTS がリリースされる予定の月でもあります。
+サポート期限も変わらず 2024/5/1 です。
+ちなみに次の LTS バージョンである .NET 8 のリリース予定は 2023/11 です。
 
 ✅ 実行環境が Mono から .NET 6 に
 
@@ -234,10 +235,10 @@ Android プロジェクトのみ `Xamarin.Forms.Android` 名前空間との衝�
 
 :::message
 Xamarin.Forms.Visual.Material には Xamarin.(Android|iOS) のバージョンチェック処理が含まれていますが、.NET 6 を使用している場合 Xamarin.(Android|iOS) 6.0 と誤認識されてしまいコンパイルエラーになります。
-`XFDisableTargetFrameworkValidation` を `True` に設定することでこのバージョンチェック処理をスキップすることができます。[^2]
+`XFDisableTargetFrameworkValidation` を `True` に設定することでこのバージョンチェック処理をスキップすることができます。[^3]
 :::
 
-[^2]: ソース: https://github.com/xamarin/Xamarin.Forms/blob/8af4f19be0cfb75f6a1df70c4db94eb6937ea1ee/.nuspec/Xamarin.Forms.Visual.Material.targets#L2
+[^3]: ソース: https://github.com/xamarin/Xamarin.Forms/blob/8af4f19be0cfb75f6a1df70c4db94eb6937ea1ee/.nuspec/Xamarin.Forms.Visual.Material.targets#L2
 
 ### 4. Visual Studio でソリューションを開き、構成マネージャを開く
 
@@ -251,9 +252,9 @@ Xamarin.Forms.Visual.Material には Xamarin.(Android|iOS) のバージョンチ
 
 従来の Xamarin では .NET の Linux 向け実装である Mono が使用されていました。
 その Mono に含まれる `Mono.Runtime` クラスの `Runtime.GetDisplayName()` クラスをリフレクションで取得し、実行することで確かめてみましょう。
-下記のようなコードで取得することができます。[^3]
+下記のようなコードで取得することができます。[^4]
 
-[^3]: 参考: https://social.msdn.microsoft.com/Forums/en-US/5dd995d7-9692-4647-9c7a-107129823ea0/how-to-check-my-mono-version
+[^4]: 参考: https://social.msdn.microsoft.com/Forums/en-US/5dd995d7-9692-4647-9c7a-107129823ea0/how-to-check-my-mono-version
 
 ```cs
 string monoVersion = Type.GetType("Mono.Runtime")
