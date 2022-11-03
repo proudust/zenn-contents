@@ -6,6 +6,31 @@ topics: [csharp, dotnet, xamarin, xamarinforms]
 published: true
 ---
 
+:::message alert
+2022/11 現在この記事の内容は陳腐化しており、更新中です。
+記載されている手順通りにアップグレードを実施しても **iOS 向けビルドができない**ことを確認しているため、注意してください。
+:::
+
+:::message alert
+Xamarin.Forms が .NET 6 に対応しないことが名言されました。
+そのためこの記事で紹介される方法は、**公式にはサポートされません**。
+特殊な事情が無い限り、**Xamarin.Forms プロジェクトを MAUI 移行せず .NET6 にアップグレードすることは避けてください**。
+
+> we're not going to do a .NET 6 version of Xamarin.Forms.
+>
+> https://github.com/xamarin/Xamarin.Forms/issues/14829#issuecomment-1004142873
+:::
+
+:::message
+[.NET 6 での破壊的変更](https://github.com/xamarin/xamarin-macios/issues/13087)のため、Xamarin.iOS / Xamarin.Mac のライブラリを .NET 6 プロジェクトから参照することができなくなりました。
+そのため Xamarin.iOS / Xamarin.Mac のプロジェクトを .NET 6 移行する場合、ライブラリ側の対応も必要になるため注意してください。
+
+> **Why did we not make net6.0-ios compatible with the existing Xamarin TFMs?**
+> `net6.0-ios` (and the other Apple TFMs, `net6.0-tvos` and `net6.0-macos`) contains [breaking changes](https://github.com/xamarin/xamarin-macios/issues/13087) that makes binaries built for existing Xamarin TFMs unusable.
+>
+> https://github.com/dotnet/designs/blob/main/accepted/2021/net6.0-tfms/net6.0-tfms.md#why-did-we-not-make-net60-ios-compatible-with-the-existing-xamarin-tfms
+:::
+
 この記事は[祝 .NET 6 GA！(中略) Advent Calendar 2021](https://qiita.com/advent-calendar/2021/microsoft) 8 日目の記事です。
 まあこの書き出しを書いている時点で既に 11 日なんですけどね……
 
