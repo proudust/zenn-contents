@@ -6,13 +6,10 @@ topics: [csharp, dotnet, xamarin, xamarinforms]
 published: true
 ---
 
-:::message alert
-2022/11 現在この記事の内容は陳腐化しており、更新中です。
-記載されている手順通りにアップグレードを実施しても **iOS 向けビルドができない**ことを確認しているため、注意してください。
-:::
+# 警告文
 
 :::message alert
-Xamarin.Forms が .NET 6 に対応しないことが名言されました。
+Xamarin.Forms が .NET 6 に対応しないことが明言されました。
 そのためこの記事で紹介される方法は、**公式にはサポートされません**。
 特殊な事情が無い限り、**Xamarin.Forms プロジェクトを MAUI 移行せず .NET6 にアップグレードすることは避けてください**。
 
@@ -21,15 +18,17 @@ Xamarin.Forms が .NET 6 に対応しないことが名言されました。
 > https://github.com/xamarin/Xamarin.Forms/issues/14829#issuecomment-1004142873
 :::
 
-:::message
-[.NET 6 での破壊的変更](https://github.com/xamarin/xamarin-macios/issues/13087)のため、Xamarin.iOS / Xamarin.Mac のライブラリを .NET 6 プロジェクトから参照することができなくなりました。
-そのため Xamarin.iOS / Xamarin.Mac のプロジェクトを .NET 6 移行する場合、ライブラリ側の対応も必要になるため注意してください。
+:::message alert
+[.NET 6 での破壊的変更](https://github.com/xamarin/xamarin-macios/issues/13087)のため、Xamarin.iOS / Xamarin.Mac / Xamarin.tvOS のライブラリを .NET 6 プロジェクトから参照することができなくなりました。
+そのため Xamarin.Forms プロジェクトを .NET6 へアップグレードした場合、**iOS / Mac / tvOS で動作させることはできません**。
 
 > **Why did we not make net6.0-ios compatible with the existing Xamarin TFMs?**
 > `net6.0-ios` (and the other Apple TFMs, `net6.0-tvos` and `net6.0-macos`) contains [breaking changes](https://github.com/xamarin/xamarin-macios/issues/13087) that makes binaries built for existing Xamarin TFMs unusable.
 >
 > https://github.com/dotnet/designs/blob/main/accepted/2021/net6.0-tfms/net6.0-tfms.md#why-did-we-not-make-net60-ios-compatible-with-the-existing-xamarin-tfms
 :::
+
+# 本文
 
 この記事は[祝 .NET 6 GA！(中略) Advent Calendar 2021](https://qiita.com/advent-calendar/2021/microsoft) 8 日目の記事です。
 まあこの書き出しを書いている時点で既に 11 日なんですけどね……
@@ -56,7 +55,7 @@ MAUI は .NET 6 以降のみのサポートとなる[^2]ため、従来の Xamar
 | ----------------------------------------- | ------------------------- | ----------------------- | ---------- |
 | フレームワーク                            | Xamarin.Forms             | Xamarin.Forms           | ✅ **MAUI** |
 | フレームワークのサポート期限              | 2024/5/1                  | 2024/5/1                | ✅ 未発表   |
-| 実行環境                                  | Xamarin (Mono)            | ✅ **.NET 6**            | .NET 6     |
+| 実行環境                                  | Xamarin (Mono)            | ⚠️ **.NET 6**            | ✅ .NET 6   |
 | 実行環境のサポート期限                    | 2024/5/1                  | ✅ **2024/11/08**        | 2024/11/08 |
 | `.csproj` の形式                          | Non-SDK-style / SDK-style | ⚠️ **SDK-style**         | SDK-style  |
 | 既定の C# バージョン                      | C# 8.0                    | ✅ **C# 10.0**           | C# 10.0    |
@@ -68,13 +67,19 @@ MAUI は .NET 6 以降のみのサポートとなる[^2]ため、従来の Xamar
 サポート期限も変わらず 2024/5/1 です。
 ちなみに次の LTS バージョンである .NET 8 のリリース予定は 2023/11 です。
 
-✅ 実行環境が Mono から .NET 6 に
+⚠️ 実行環境が Mono から .NET 6 に
 
-これにより、従来の `netstandard2.1` やプラットフォーム固有のライブラリに加え、`netcoreapp` `net5.0` `net6.0` のライブラリを使用できます。
-.NET 6 までの性能向上の恩恵を受けられる半面、細かい破壊的変更が多数含まれているため注意が必要です。
+これにより、従来の `netstandard2.1` ~~やプラットフォーム固有のライブラリに加え、~~`netcoreapp` `net5.0` `net6.0` のライブラリを使用できます。
+ただし[冒頭に記述した](#警告文)通り `xamarinios` `xamarinmac` `xamarintvos` のライブラリは .NET 6 で使用できなくなってしまっています。
+.NET 6 向けビルドが提供されていない Xamarin.Forms も使用できないため、iOS / Mac / tvOS 向けビルドが必要な場合は MAUI への移行も同時に行いましょう。
+また互換性のあるはずの `monoandroid` などのライブラリであっても `netcoreapp` 向けのバイナリを参照してしまう場合があるため、ライブラリの扱いには注意が必要です。
+
+https://github.com/xamarin/XamarinCommunityToolkit/issues/985
+
+その他にも細かい破壊的変更が多数含まれているため注意が必要です。
 
 筆者が特に注意が必要と考えている破壊的変更は以下の 2 つです。
-アプリケーションコードで使用していない場合でもサードパーティー製ライブラリで利用している可能性もあるため気を付けましょう。
+アプリケーションコードで使用していない場合でもサードパーティ製ライブラリで利用している可能性もあるため気を付けましょう。
 
 - [DeflateStream、GZipStream、CryptoStream での部分的な読み取りとゼロバイトの読み取り](https://docs.microsoft.com/ja-jp/dotnet/core/compatibility/core-libraries/6.0/partial-byte-reads-in-streams)
 - [System.Drawing.Common が Windows でしかサポートされない](https://docs.microsoft.com/ja-jp/dotnet/core/compatibility/core-libraries/6.0/system-drawing-common-windows-only)
@@ -118,13 +123,6 @@ Visual Studio for Mac での動作確認はしていないため、注意して�
 https://visualstudio.microsoft.com/
 
 また実際に移行した際のソースコードは [github.com/proudust/XamarinSandbox](https://github.com/proudust/XamarinSandbox/tree/xamarin-update/net6.0) にあります。
-
-:::message alert
-[Xamarin.CommunityToolkit](https://www.nuget.org/packages/Xamarin.CommunityToolkit/) など下記条件を満たす NuGet パッケージを参照している場合、下記手順では正しく移行することができません。
-
-- .NET 6 用バイナリが同梱されていない
-- .NET Core 3.1 用バイナリが Windows 依存になっている
-:::
 
 ### 1. `dotnet workload` コマンドで Android / iOS ワークロードをインストール
 
@@ -208,10 +206,10 @@ Non-SDK-style だった場合はプラットフォーム固有のプロジェク
    </PropertyGroup>
 ```
 
-**iOS プロジェクト**
-- `TargetFramework` を `net6.0-ios` に変更
-- `PropertyGroup` に `<GenerateAssemblyInfo>false</GenerateAssemblyInfo>` を追加
-- (Xamarin.Forms.Visual.Material を参照している場合のみ) `XFDisableTargetFrameworkValidation` を `True` で追加
+~~**iOS プロジェクト**~~
+- ~~`TargetFramework` を `net6.0-ios` に変更~~
+- ~~`PropertyGroup` に `<GenerateAssemblyInfo>false</GenerateAssemblyInfo>` を追加~~
+- ~~(Xamarin.Forms.Visual.Material を参照している場合のみ) `XFDisableTargetFrameworkValidation` を `True` で追加~~
 
 ```diff xml:XamarinSandbox.iOS.csproj
    <PropertyGroup>
@@ -234,7 +232,7 @@ Android プロジェクトのみ `Xamarin.Forms.Android` 名前空間との衝�
 :::
 
 :::message
-Xamarin.Forms.Visual.Material には Xamarin.(Android|iOS) のバージョンチェック処理が含まれていますが、.NET 6 を使用している場合 Xamarin.(Android|iOS) 6.0 と誤認識されてしまいコンパイルエラーになります。
+Xamarin.Forms.Visual.Material には Xamarin.Android のバージョンチェック処理が含まれていますが、.NET 6 を使用している場合 Xamarin.Android 6.0 と誤認識されてしまいコンパイルエラーになります。
 `XFDisableTargetFrameworkValidation` を `True` に設定することでこのバージョンチェック処理をスキップすることができます。[^3]
 :::
 
