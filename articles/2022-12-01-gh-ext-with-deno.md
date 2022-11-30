@@ -3,7 +3,7 @@ title: "Deno で GitHub CLI 拡張機能書く"
 emoji: "🔌"
 type: "tech" # tech: 技術記事 / idea: アイデア
 topics: [deno, github, githubcli, gh]
-published: false
+published: true
 ---
 
 この記事は[Deno Advent Calendar 2022](https://qiita.com/advent-calendar/2022/deno) 1 日目の記事です。
