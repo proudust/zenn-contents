@@ -3,7 +3,7 @@ title: "Deno でカスタム GitHub アクション書く"
 emoji: "🦾"
 type: "tech" # tech: 技術記事 / idea: アイデア
 topics: [deno, github, githubactions]
-published: false
+published: true
 ---
 
 この記事は[GitHub Actions Advent Calendar 2022](https://qiita.com/advent-calendar/2022/github-actions) 2 日目の記事です。
