@@ -3,16 +3,17 @@ title: "MAUI アプリを GitHub Actions 上でビルドする"
 emoji: "🏗️"
 type: "tech" # tech: 技術記事 / idea: アイデア
 topics: [dotnet, maui, githubactions]
-published: false
+published: true
 ---
 
 この記事は[C# Advent Calendar 2022](https://qiita.com/advent-calendar/2022/csharplang) 6 日目の記事です。
+最近遅刻常習者になりつつあるので気を付けます……。
 
 先日 MAUI を GitHub Actions 上でビルドしようとして地味に苦戦したので書いておきます。
 
-## TFM とビルド可能な OS
+## TFM とビルド (発行) 可能な OS
 
-.NET 7.0.100 現在、各 OS でビルド可能な TargetFramework は以下のようになっています。 (`net6.0` も同様のため省略)
+.NET 7.0.100 現在、各 OS でビルド (発行) 可能な TargetFramework は以下のようになっています。 (`net6.0` も同様のため省略)
 
 | TargetFrameworks     | Linux | MacOS | Windows |
 | -------------------- | :---: | :---: | :-----: |
@@ -22,11 +23,11 @@ published: false
 | `net7.0-windows`     |       |       |    ✅    |
 
 このように見事にバラバラなため、それぞれの OS でビルド or 発行するジョブを書いていく必要があります。面倒ですね。
-今回は private リポジトリで GitHub Actions をケチりながら使うことを考え `net7.0-android` は `ubuntu`、`net7.0-windows` は `windows`、`net7.0-ios` と `net6.0-maccatalyst` は `macos` でビルドしてみようと思います。
+今回はビルドが通ることのみを確認するため、`net7.0-android` は `ubuntu-latest`、他は `windows-latest` でビルドしてみます。
 
 [^1]: 要 `.csproj` ファイル修正
 
-[^2]: `dotnet build` のみ可能、`dotnet publish` はエラー
+[^2]: ビルドのみ可能、発行はエラー
 
 ## Linux 上で Android 向けビルドができるように修正する
 
@@ -41,16 +42,46 @@ Error: /usr/share/dotnet/sdk/7.0.100/Sdks/Microsoft.NET.Sdk/targets/Microsoft.NE
 ```
 
 何故か二回同じエラーが表示されますが、Linux 上で `net7.0-ios` `net7.0-maccatalyst` がビルドできないことに起因するエラーのようで、`-f` オプションを付けていても発生するようでした。
-そのため Linux 上では `net7.0-ios` `net7.0-maccatalyst` を TFMs から外さないとビルドできないようです。
+この問題は `csproj` を下記のように編集し、Linux 上では `net7.0-ios` `net7.0-maccatalyst` を TFMs から外すことで回避できます。
 
-## 地獄のような matrix で並列ビルドしてみる
+```diff xml
+  <PropertyGroup>
+-   <TargetFrameworks>net7.0-android;net7.0-ios;net7.0-maccatalyst</TargetFrameworks>
++   <TargetFrameworks>net7.0-android</TargetFrameworks>
++   <TargetFrameworks Condition="!$([MSBuild]::IsOSPlatform('linux'))">$(TargetFrameworks);net7.0-ios;net7.0-maccatalyst</TargetFrameworks>
+  </PropertyGroup>
+```
 
-WIP
+## matrix で並列ビルドしてみる
 
-## 結局発行は個別のジョブで
+発行まで行わないのであればビルドまでのステップはどの TFM でも同一のため、matrix で並列ビルドさせてみましょう。
+Android のみ `ubuntu-latest` でビルドする必要があるため別ジョブに切り出す必要があるかと思っていましたが、JavaScript のような論理積、論理和の悪用(?)をすることで一つのジョブにまとめることができます。
 
-WIP
+https://qiita.com/technote-space/items/cbeed6ddd0488499afaa
 
+```yaml
+    runs-on: ${{ (contains(matrix.tfm, 'android') && 'ubuntu-latest') || 'windows-latest' }}
+    strategy:
+      matrix:
+        tfm: [net7.0-android, net7.0-ios, net7.0-maccatalyst, net7.0-windows10.0.19041.0]
+```
+
+`net7.0-ios`、`net7.0-maccatalyst` を `macos-12` [^3] でビルドさせたい場合は下記のようにすれば一応できましたが、あまりにも可読性が低いのでおすすめはしません。
+
+```yaml
+    runs-on: ${{ (contains(matrix.tfm, 'android') && 'ubuntu-latest') || (contains(matrix.tfm, 'windows') && 'windows-latest') || 'macos-12' }}
+    strategy:
+      matrix:
+        tfm: [net7.0-android, net7.0-ios, net7.0-maccatalyst, net7.0-windows10.0.19041.0]
+```
+
+[^3]: 2022-12-07 現在、`macos-latest` は `macos-11` のエイリアスになっているため Xcode のバージョンが古く、ビルドがうまくいかないので気を付けましょう。(1敗)
+
+## 発行までしたい場合
+
+今回はビルドのみを行いましたが、発行まで行いたい場合は下記の記事の手順で行うことができます。
+
+https://blog.taranissoftware.com/building-net-maui-apps-with-github-actions
 ## おまけ: Linux 上で Windows 向けビルドはできる？
 
 先日 .NET 7 から Linux 上で Windows 向け WPF アプリがビルドできるようになったらしく、もしやと思って MAUI でも試してみました。
@@ -79,9 +110,5 @@ MSBuild version 17.4.0+18d5aef85 for .NET
 /home/runner/.nuget/packages/microsoft.windowsappsdk/1.1.5/buildTransitive/Microsoft.UI.Xaml.Markup.Compiler.interop.targets(559,9): error MSB3073: The command ""/home/runner/.nuget/packages/microsoft.windowsappsdk/1.1.5/buildTransitive/../tools/net5.0/../net472/XamlCompiler.exe" "../MauiSandbox.Net7/obj/Debug/net7.0-windows10.0.19041.0/input.json" "../MauiSandbox.Net7/obj/Debug/net7.0-windows10.0.19041.0/output.json"" exited with code 1. [/home/runner/work/MauiSandbox/MauiSandbox/MauiSandbox/MauiSandbox.Net7.csproj::TargetFramework=net7.0-windows10.0.19041.0]
 ```
 
-ファイルパスから察するに、MAUI が依存している Win UI 3 が .NET Framework で動作する XAML コンパイラに依存してしまっているため、正常動作しないようです。
-WPF と同じで忘れたころに Linux ビルドできるようになりそうですね。
-
-## 参考
-
-- [Building .NET MAUI apps with GitHub Actions](https://blog.taranissoftware.com/building-net-maui-apps-with-github-actions)
+ファイルパスから察するに、MAUI が依存している Win UI 3 が .NET Framework で動作する XAML コンパイラを使用してしまっているため、正常動作しないようです。
+この分だとWPF と同じで忘れたころに Linux ビルドできるようになりそうですね。
